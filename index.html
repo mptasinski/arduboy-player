@@ -176,6 +176,68 @@
       color: #e8e8e8;
     }
 
+    /* ── Game library ────────────────────────────────────────── */
+    .library {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      padding: 16px 0;
+    }
+
+    .library h2 {
+      font-size: 1.4rem;
+      color: #aad4ff;
+    }
+
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px;
+      width: 100%;
+    }
+
+    .game-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, transform 0.15s;
+      text-align: center;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .game-card:hover {
+      background: rgba(126, 207, 255, 0.12);
+      border-color: rgba(126, 207, 255, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .game-card img {
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 8px rgba(0, 180, 255, 0.4));
+    }
+
+    .game-card span {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #e0e0e0;
+    }
+
+    .library-error {
+      color: #ff8080;
+      font-size: 0.9rem;
+    }
+
     footer {
       width: 100%;
       padding: 16px 24px;
@@ -242,6 +304,36 @@
           + '</div>';
       }
 
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function buildGameUrl(gameFile) {
+        var base = window.location.href.split('?')[0];
+        return base + '?file=' + encodeURIComponent(new URL(gameFile, window.location.href).href);
+      }
+
+      function renderLibrary(games) {
+        if (!games || games.length === 0) {
+          return '<div class="library"><h2>No games found</h2><p class="library-error">Add <code>.hex</code> files to the <code>games/</code> folder and update <code>games/index.json</code>.</p></div>';
+        }
+        var cards = games.map(function (g) {
+          var url = buildGameUrl(g.file);
+          return '<a class="game-card" href="' + escapeHtml(url) + '">'
+            + '<img src="assets/arduboy.png" alt="' + escapeHtml(g.name) + '" />'
+            + '<span>' + escapeHtml(g.name) + '</span>'
+            + '</a>';
+        }).join('');
+        return '<div class="library">'
+          + '<h2>Select a Game</h2>'
+          + '<div class="game-grid">' + cards + '</div>'
+          + '</div>';
+      }
+
       if (fileUrl) {
         var ardensUrl = 'https://tiberiusbrown.github.io/Ardens/player.html?file=' + encodeURIComponent(fileUrl);
         main.innerHTML =
@@ -255,14 +347,19 @@
           + '</div>'
           + '</div>';
       } else {
-        main.innerHTML =
-          '<div class="no-game">'
-          + '<img class="bg" src="assets/arduboy.png" alt="Arduboy device" />'
-          + '<h2>No game loaded</h2>'
-          + '<p>Pass a hex file URL via the <code>file</code> query parameter to play a game:</p>'
-          + '<p><code>?file=https://example.com/game.hex</code></p>'
-          + buildControlsCard()
-          + '</div>';
+        fetch('games/index.json')
+          .then(function (r) { return r.json(); })
+          .then(function (games) {
+            main.innerHTML = renderLibrary(games);
+          })
+          .catch(function () {
+            main.innerHTML = '<div class="no-game">'
+              + '<img class="bg" src="assets/arduboy.png" alt="Arduboy device" />'
+              + '<h2>Could not load game list</h2>'
+              + '<p class="library-error">Unable to fetch <code>games/index.json</code>.</p>'
+              + buildControlsCard()
+              + '</div>';
+          });
       }
     })();
   </script>
