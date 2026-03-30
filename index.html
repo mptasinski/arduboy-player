@@ -276,7 +276,7 @@
   <script>
     (function () {
       var params = new URLSearchParams(window.location.search);
-      var fileUrl = params.get('file');
+      var gameSlug = params.get('game');
       var main = document.getElementById('main');
 
       var controls = [
@@ -312,29 +312,13 @@
           .replace(/"/g, '&quot;');
       }
 
-      function buildGameUrl(gameFile) {
+      function buildGameUrl(game) {
         var base = window.location.href.split('?')[0];
-        return base + '?file=' + encodeURIComponent(new URL(gameFile, window.location.href).href);
+        return base + '?game=' + encodeURIComponent(game.slug);
       }
 
-      function renderLibrary(games) {
-        if (!games || games.length === 0) {
-          return '<div class="library"><h2>No games found</h2><p class="library-error">Add <code>.hex</code> files to the <code>games/</code> folder and update <code>games/index.json</code>.</p></div>';
-        }
-        var cards = games.map(function (g) {
-          var url = buildGameUrl(g.file);
-          return '<a class="game-card" href="' + escapeHtml(url) + '">'
-            + '<img src="assets/arduboy.png" alt="' + escapeHtml(g.name) + '" />'
-            + '<span>' + escapeHtml(g.name) + '</span>'
-            + '</a>';
-        }).join('');
-        return '<div class="library">'
-          + '<h2>Select a Game</h2>'
-          + '<div class="game-grid">' + cards + '</div>'
-          + '</div>';
-      }
-
-      if (fileUrl) {
+      function launchGame(game) {
+        var fileUrl = new URL(game.file, window.location.href).href;
         var ardensUrl = 'https://tiberiusbrown.github.io/Ardens/player.html?file=' + encodeURIComponent(fileUrl);
         main.innerHTML =
           '<div class="player-layout">'
@@ -346,6 +330,47 @@
           +   buildControlsCard()
           + '</div>'
           + '</div>';
+      }
+
+      function renderLibrary(games) {
+        if (!games || games.length === 0) {
+          return '<div class="library"><h2>No games found</h2><p class="library-error">Add <code>.hex</code> files to the <code>games/</code> folder and update <code>games/index.json</code>.</p></div>';
+        }
+        var cards = games.map(function (g) {
+          var url = buildGameUrl(g);
+          return '<a class="game-card" href="' + escapeHtml(url) + '">'
+            + '<img src="assets/arduboy.png" alt="' + escapeHtml(g.name) + '" />'
+            + '<span>' + escapeHtml(g.name) + '</span>'
+            + '</a>';
+        }).join('');
+        return '<div class="library">'
+          + '<h2>Select a Game</h2>'
+          + '<div class="game-grid">' + cards + '</div>'
+          + '</div>';
+      }
+
+      if (gameSlug) {
+        fetch('games/index.json')
+          .then(function (r) { return r.json(); })
+          .then(function (games) {
+            var game = games.find(function (g) { return g.slug === gameSlug; });
+            if (game) {
+              launchGame(game);
+            } else {
+              main.innerHTML = '<div class="no-game">'
+                + '<h2>Game not found</h2>'
+                + '<p class="library-error">No game with slug <code>' + escapeHtml(gameSlug) + '</code> was found.</p>'
+                + '</div>';
+            }
+          })
+          .catch(function () {
+            main.innerHTML = '<div class="no-game">'
+              + '<img class="bg" src="assets/arduboy.png" alt="Arduboy device" />'
+              + '<h2>Could not load game list</h2>'
+              + '<p class="library-error">Unable to fetch <code>games/index.json</code>.</p>'
+              + buildControlsCard()
+              + '</div>';
+          });
       } else {
         fetch('games/index.json')
           .then(function (r) { return r.json(); })
