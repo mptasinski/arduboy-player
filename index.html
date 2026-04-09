@@ -349,7 +349,22 @@
           + '</div>';
       }
 
-      if (gameSlug) {
+      if (gameSlug === 'gta6') {
+        main.innerHTML =
+          '<div class="no-game" id="gta6-egg" style="padding:60px 20px;">'
+          + '<img class="bg" src="assets/arduboy.png" alt="Not GTA 6" style="filter:drop-shadow(0 0 40px #ff3030) hue-rotate(120deg);" />'
+          + '<h2 style="font-size:2rem;color:#ff4444;text-shadow:0 0 20px #ff0000;">🚨 GTA 6 – BREAKING NEWS 🚨</h2>'
+          + '<p style="font-size:1.2rem;color:#ffcc00;max-width:640px;">'
+          +   'Rockstar Games just announced: GTA 6 release date has been officially moved to'
+          +   ' <strong><span style="color:#ff4444;font-size:1.5rem;text-shadow:0 0 12px #ff0000;">March 15, 2142</span></strong>.'
+          + '</p>'
+          + '<p style="color:#b0b8cc;max-width:560px;font-size:0.95rem;">'
+          +   '"We want to make sure the game meets our extremely high standards. '
+          +   'The extra 118 years should be enough." — Rockstar PR, probably'
+          + '</p>'
+          + '<p style="font-size:2rem;margin-top:8px;">🎮💀</p>'
+          + '</div>';
+      } else if (gameSlug) {
         fetch('games/index.json')
           .then(function (r) { return r.json(); })
           .then(function (games) {
