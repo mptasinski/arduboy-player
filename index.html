@@ -349,7 +349,22 @@
           + '</div>';
       }
 
-      if (gameSlug) {
+      if (gameSlug === 'gta6') {
+        main.innerHTML =
+          '<div class="no-game" style="gap:32px;padding:60px 20px;">'
+          + '<img class="bg" src="assets/arduboy.png" alt="Arduboy" style="filter:drop-shadow(0 0 40px rgba(255,80,80,0.7));animation:spin 4s linear infinite;" />'
+          + '<h2 style="font-size:2rem;color:#ff6060;">🎮 GTA VI 🎮</h2>'
+          + '<p style="font-size:1.2rem;color:#ffcc00;font-weight:bold;">Premiera przesunięta na Q3 2147</p>'
+          + '<p style="max-width:560px;line-height:1.8;color:#b0b8cc;">'
+          + 'Rockstar Games z dumą ogłasza, że GTA VI zostało przesunięte, aby zapewnić najwyższą jakość doświadczenia.<br>'
+          + 'Gra będzie dostępna wyłącznie na konsolach, które nie zostały jeszcze wynalezione.<br>'
+          + '<span style="color:#7ecfff;font-style:italic;">"Jesteśmy pewni, że jest warta czekania." — Rockstar, 2025, 2026, 2027, 2028...'
+          + '</span>'
+          + '</p>'
+          + '<p style="color:#666;font-size:0.85rem;">Tymczasem zapraszamy do grania w gry na Arduboy 😅</p>'
+          + '</div>'
+          + '<style>@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}</style>';
+      } else if (gameSlug) {
         fetch('games/index.json')
           .then(function (r) { return r.json(); })
           .then(function (games) {
